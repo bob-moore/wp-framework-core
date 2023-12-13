@@ -1,0 +1,13 @@
+<?php
+
+namespace DI;
+
+use \Devkit\WPCore\DI\Container;
+
+class ContainerBuilder
+{
+    /**
+     * @return Container
+     */
+    public function build(); 
+}

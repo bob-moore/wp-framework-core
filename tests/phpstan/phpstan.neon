@@ -1,0 +1,10 @@
+includes:
+    - ../../vendor/szepeviktor/phpstan-wordpress/extension.neon
+parameters:
+	level: 6
+	checkGenericClassInNonGenericObjectType : false
+	paths:
+		- ../../src
+	stubFiles:
+		- stubs/DI/ContainerBuilder.stub
+		- stubs/Container.stub
