@@ -19,38 +19,38 @@ use DI\Attribute\Inject,
 /**
  * Script Trait
  *
- * Used by classes to import the script dispatcher
+ * Used by classes to import the script handler
  *
  * @subpackage Traits
  */
-trait ScriptDispatcher
+trait Scripts
 {
 	/**
 	 * Script handler instance
 	 *
-	 * @var Interfaces\Dispatchers\Scripts|null
+	 * @var Interfaces\Handlers\Scripts|null
 	 */
-	protected ?Interfaces\Dispatchers\Scripts $script_dispatcher;
+	protected ?Interfaces\Handlers\Scripts $script_handler;
 	/**
-	 * Setter for the script dispatcher
+	 * Setter for the script handler
 	 *
-	 * @param Interfaces\Dispatchers\Scripts $script_dispatcher : instance of script dispatcher.
+	 * @param Interfaces\Handlers\Scripts $script_handler : instance of script handler.
 	 *
 	 * @return void
 	 */
 	#[Inject]
-	public function setScriptDispatcher( Interfaces\Dispatchers\Scripts $script_dispatcher ): void
+	public function setScriptHandler( Interfaces\Handlers\Scripts $script_handler ): void
 	{
-		$this->script_dispatcher = $script_dispatcher;
+		$this->script_handler = $script_handler;
 	}
 	/**
-	 * Getter for the script dispatcher
+	 * Getter for the script handler
 	 *
-	 * @return Interfaces\Dispatchers\Scripts|null
+	 * @return Interfaces\Handlers\Scripts|null
 	 */
-	public function getScriptDispatcher(): ?Interfaces\Dispatchers\Scripts
+	public function getScriptHandler(): ?Interfaces\Handlers\Scripts
 	{
-		return $this->script_dispatcher;
+		return $this->script_handler;
 	}
 	/**
 	 * Register a JS file with WordPress
@@ -70,7 +70,7 @@ trait ScriptDispatcher
 		string $version = '',
 		$in_footer = true
 	): void {
-		$this->script_dispatcher->enqueue(
+		$this->script_handler->enqueue(
 			$handle,
 			$path,
 			$dependencies,

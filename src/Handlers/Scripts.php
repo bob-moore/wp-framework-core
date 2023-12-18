@@ -11,7 +11,7 @@
  * @since   1.0.0
  */
 
-namespace Devkit\WPCore\Dispatchers;
+namespace Devkit\WPCore\Handlers;
 
 use DI\Attribute\Inject,
 	Devkit\WPCore\Abstracts,
@@ -19,12 +19,12 @@ use DI\Attribute\Inject,
 	Devkit\WPCore\Traits;
 
 /**
- * Dispatcher to handle JS file enqueueing
+ * Handler to handle JS file enqueueing
  *
- * @subpackage Dispatchers
+ * @subpackage Handlers
  */
 class Scripts extends Abstracts\Mountable implements
-	Interfaces\Dispatchers\Scripts,
+	Interfaces\Handlers\Scripts,
 	Interfaces\Handlers\Directory,
 	Interfaces\Handlers\Url
 {
@@ -36,29 +36,34 @@ class Scripts extends Abstracts\Mountable implements
 	 *
 	 * Can include an additional string, to make it relative to a different file
 	 *
-	 * @param string $dir : the root directory path.
-	 * @param string $append : additional string to append to the directory path.
+	 * @param string $app_dir : the root directory path.
+	 * @param string $assets_dir : additional string to append to the directory path.
 	 *
 	 * @return void
 	 */
 	#[Inject]
-	public function setDir( #[Inject( 'assets.dir' )] string $dir, string $append = '' ): void
+	public function setDir( 
+		#[Inject( 'config.dir' )] string $app_dir, 
+		#[Inject( 'config.assets.dir' )] string $assets_dir = '' ): void
 	{
-		$this->dir = untrailingslashit( $dir );
+		$this->dir = $this->appendDir( $app_dir, $assets_dir );
 	}
 	/**
 	 * Set the base URL
 	 * Can include an additional string for appending to the URL of the plugin
 	 *
-	 * @param string $url : root directory to use.
-	 * @param string $append : additional string to append to the URL path.
+	 * @param string $app_url : root directory to use.
+	 * @param string $assets_dir : additional string to append to the URL path.
 	 *
 	 * @return void
 	 */
 	#[Inject]
-	public function setUrl( #[Inject( 'assets.url' )] string $url, string $append = '' ): void
+	public function setUrl( 
+		#[Inject( 'config.url' )] string $app_url, 
+		#[Inject( 'config.assets.dir' )] string $assets_dir = ''
+	): void
 	{
-		$this->url = $this->appendUrl( $url, $append );
+		$this->url = $this->appendUrl( $app_url, $assets_dir );
 	}
 	/**
 	 * Get script assets from {handle}.asset.php

@@ -13,6 +13,8 @@
 
 namespace Devkit\WPCore\DI;
 
+use Devkit\WPCore\Helpers;
+
 use DI,
 	DI\DependencyException,
 	DI\NotFoundException,
@@ -55,12 +57,82 @@ final class Container extends DI\Container
 		 * Else load new service
 		 */
 		try {
+			// searchArray
+			// if ( ! $this->has( $id ) && str_contains( $id, '.' ) ) {
+
+			// 	$parts = explode( '.', $id );
+
+			// 	$value = parent::get( $parts[0] );
+
+			// 	if ( ! is_array( $value ) ) {
+			// 		throw new NotFoundException( "Service {$id} not found." );
+			// 	}
+
+			// 	$search = str_replace( $parts[0] . '.', '', $id );
+
+			// 	$instance = Helpers::searchArray( $value, $search, '.' );
+
+			// }
+			// else {
+			// 	$instance = parent::get( $id );
+
+			// 	$this->afterGetService( $instance );
+			// }
+
 			$instance = parent::get( $id );
+
 			$this->afterGetService( $instance );
+
 			return $instance;
+
 		} catch ( DependencyException | NotFoundException $e ) {
 			return new WP_Error( $e->getMessage() );
 		}
+	}
+
+	// public function has(string $id) : bool
+    // {
+	// 	if ( parent::has( $id ) ) {
+	// 		return true;
+	// 	}
+
+	// 	if ( ! str_contains( $id, '.' ) ) {
+	// 		return false;
+	// 	}
+
+	// 	$parts = explode( '.', $id );
+
+	// 	if ( ! parent::has( $parts[0] ) ) {
+	// 		return false;
+	// 	}
+
+	// 	$value = parent::get( $parts[0] );
+
+	// 	if ( ! is_array( $value ) ) {
+	// 		return false;
+	// 	}
+
+	// 	$search = str_replace( $parts[0] . '.', '', $id );
+		
+	// 	$nested_value = Helpers::searchArray( $value, $search, '.' );
+
+	// 	if ( ! is_null( $nested_value ) ) {
+	// 		$this->set( $id, $nested_value );
+	// 		return true;
+	// 	}
+
+	// 	return false;
+    // }
+
+	protected function getPartial( string $base_name, string $needle ) {
+
+		$instance = parent::get( $base_name );
+
+		if ( is_array( $instance ) ) {
+			return Helpers::searchArray( $instance, $needle, '.' );
+		}
+
+		return $instance;
 	}
 	/**
 	 * Actions to run after a service is retrieved
@@ -120,8 +192,8 @@ final class Container extends DI\Container
 		/**
 		 * Run action for additional decoration
 		 */
-		if ( $this->has( 'app.package' ) ) {
-			do_action( "{$this->get( 'app.package' )}_after_get_service", $instance, $this );
+		if ( $this->has( 'config.package' ) ) {
+			do_action( "{$this->get( 'config.package' )}_after_get_service", $instance, $this );
 		}
 	}
 	/**

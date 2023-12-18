@@ -23,10 +23,10 @@ use Devkit\WPCore\Abstracts,
  *
  * @subpackage Route
  */
-class Frontend extends Abstracts\Mountable implements Interfaces\Uses\ScriptDispatcher, Interfaces\Uses\StyleDispatcher
+class Frontend extends Abstracts\Mountable implements Interfaces\Uses\Scripts, Interfaces\Uses\Styles
 {
-	use Traits\Uses\ScriptDispatcher;
-	use Traits\Uses\StyleDispatcher;
+	use Traits\Uses\Scripts;
+	use Traits\Uses\Styles;
 
 	/**
 	 * Load actions and filters, and other setup requirements

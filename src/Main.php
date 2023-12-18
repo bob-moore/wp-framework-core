@@ -26,11 +26,8 @@ use ValueError;
  *
  * @subpackage Traits
  */
-class Main extends Abstracts\Mountable implements Interfaces\Main
+class Main extends Abstracts\Mountable implements Interfaces\Main, Interfaces\Controller
 {
-	use Traits\Handlers\Url;
-	use Traits\Handlers\Directory;
-
 	/**
 	 * The service container for dependency injections, and locating service
 	 * instances
@@ -45,64 +42,140 @@ class Main extends Abstracts\Mountable implements Interfaces\Main
 	 */
 	protected const PACKAGE = '';
 	/**
-	 * Constructor for new instance of plugin
+	 * The type of app this belongs to.
+	 * 
+	 * Should be 'plugin', 'theme', or 'child-theme'. Defaults to 'plugin'.
 	 *
-	 * @param string $package : name of the package this instance belongs to.
-	 * @param string $root_file : path to root file of the plugin.
-	 *
-	 * @throws ValueError Error thrown if required data not provided.
+	 * @var string
 	 */
-	public function __construct( string $package = '', string $root_file = '' )
+	protected const TYPE = 'plugin';
+	/**
+	 * Configuration array
+	 *
+	 * @var array
+	 */
+	protected array $config = [];
+	/**
+	 * Default constructor
+	 *
+	 * @param array $config : configuration array to merge with defaults.
+	 * 
+	 * @throws ValueError
+	 */
+	public function __construct( array $config = [] )
 	{
-		/**
-		 * Maybe set package
-		 */
-		if ( empty( $this->package ) ) {
-			if ( empty( $package ) && empty( static::PACKAGE ) ) {
-				throw new ValueError( esc_html__( 'Package ID is required' ) );
-			} else {
-				$this->setPackage( ! empty( $package ) ? $package : static::PACKAGE );
-			}
-		}
-		/**
-		 * Maybe set url
-		 */
-		if ( empty( $this->url ) ) {
-			if ( empty( $root_file ) ) {
-				throw new ValueError( esc_html__( 'Root plugin file required to set URL' ) );
-			} else {
-				$this->setUrl( plugin_dir_url( $root_file ) );
-			}
-		}
-		/**
-		 * Maybe set dir
-		 */
-		if ( empty( $this->dir ) ) {
-			if ( empty( $root_file ) ) {
-				throw new ValueError( esc_html__( 'Root plugin file required to set DIR' ) );
-			} else {
-				$this->setDir( plugin_dir_path( $root_file ) );
-			}
-		}
+		$this->setConfig( $config );
 
-		$this->service_container = $this->getContainer();
+		$this->setPackage( $this->config['package'] );
+
+		if ( empty( $this->package ) ) {
+			throw new ValueError( 'Package name is required' );
+		}
 
 		parent::__construct();
 	}
+
 	/**
-	 * Set the class package
+	 * Setter for config field.
+	 * 
+	 * Ensures default values are set for package, dir, and url.
 	 *
-	 * @param string $package : name used to reference the current instance.
+	 * @param array $config
 	 *
 	 * @return void
 	 */
-	public function setPackage( string $package ): void
+	public function setConfig( array $config ): void
 	{
-		if ( ! empty( trim( $package ) ) ) {
-			parent::setPackage( $package );
-		} elseif ( empty( $this->package ) ) {
-			parent::setPackage( str_ireplace( '\\', '_', static::class ) );
-		}
+		$config = [
+			'package' => $config['package'] ?? static::PACKAGE,
+			'type'    => $config['type'] ?? static::TYPE,
+			'dir'     => untrailingslashit( $config['dir'] ?? $this->getDefaultDir() ),
+			'assets'  => [
+				'dir' => untrailingslashit( ltrim( $config['assets']['dir'] ?? $config['assets'] ?? 'dist', '/' ) ),
+				'url' => ContainerBuilder::string( '{config.url}{config.assets.dir}' ),
+			],
+			'views'   => [
+				'dir' => untrailingslashit( ltrim( $config['views']['dir'] ?? '/views', '/' ) ),
+			],
+		];
+
+		$config['url'] = untrailingslashit( $config['url'] ?? $this->getDefaultUrl( $config['dir'] ) );
+
+		$this->config = $config;
+	}
+	/**
+	 * Set individual configuration items
+	 *
+	 * @param string $key : which config item to set.
+	 * @param mixed  $value : config value to set.
+	 *
+	 * @return void
+	 */
+	public function configure( string $key, mixed $value ): void
+	{
+		$this->config[ $key ] = $value;
+	}
+	/**
+	 * Infer default directory based on type.
+	 *
+	 * @return string
+	 */
+	protected function getDefaultDir(): string
+	{
+		return match ( static::TYPE ) {
+			'plugin'      => Helpers::defaultPluginDir(),
+			'theme'       => untrailingslashit( get_template_directory() ),
+			'child-theme' => untrailingslashit( get_stylesheet_directory() ),
+			default       => untrailingslashit( get_stylesheet_directory() ),
+		};
+	}
+	/**
+	 * Infer url based on type.
+	 *
+	 * @param string $dir : the base directory to use.
+	 *
+	 * @return string
+	 */
+	protected function getDefaultUrl( string $dir = '' ): string
+	{
+		return match ( static::TYPE ) {
+			'plugin'      => plugin_dir_url( trailingslashit( trailingslashit( $dir ) . '*.php' ) ),
+			'theme'       => untrailingslashit( get_template_directory_uri() ),
+			'child-theme' => untrailingslashit( get_stylesheet_directory_uri() ),
+			default       => untrailingslashit( get_stylesheet_directory_uri() ),
+		};
+	}
+	/**
+	 * Helper function to mount new instance of class
+	 *
+	 * @param array $config : configuration array to merge with defaults.
+	 *
+	 * @return self
+	 */
+	public static function mount( array $config = [] ): static
+	{
+		$instance = new static( $config );
+
+		$instance->setContainer(
+			$instance->getContainer( $instance->package ) ?: $instance->buildContainer()
+		);
+
+		$instance->onMount();
+
+		return $instance;
+	}
+	/**
+	 * Setter for service container
+	 *
+	 * @param ContainerInterface $container : instance of service container.
+	 *
+	 * @return void
+	 */
+	public function setContainer( ContainerInterface $container ): void
+	{
+		$this->service_container = $container;
+
+		ContainerBuilder::cacheContainer( $this->package, $this->service_container );
 	}
 	/**
 	 * Build the service container
@@ -118,72 +191,37 @@ class Main extends Abstracts\Mountable implements Interfaces\Main
 
 		$container_builder->useAttributes( true );
 
-		$container_builder->addDefinitions(
-			apply_filters(
-				"{$this->package}_definitions",
-				$this->getServiceDefinitions()
-			)
-		);
+		$container_builder->addDefinitions( ['config' => $this->config ] );
 
-		return $container_builder->build();
-	}
-	/**
-	 * Get container from the cache if available, else instantiate a new one
-	 *
-	 * Cache is used to give access to the container instead of a singleton
-	 *
-	 * @return ContainerInterface
-	 */
-	protected function getContainer(): ContainerInterface
-	{
-		$container = ContainerBuilder::locateContainer( $this->package );
+		$container_builder->addDefinitions( self::getServiceDefinitions() );
 
-		if ( ! $container ) {
-			$container = $this->buildContainer();
-			ContainerBuilder::cacheContainer( $this->package, $container );
-		}
+		$container = $container_builder->build();
 
 		return $container;
 	}
 	/**
-	 * Get service definitons to add to service container
+	 * Get container from the cache if available, else build a new one
+	 *
+	 * Cache is used to give access to the container instead of a singleton
+	 *
+	 * @return ContainerInterface|null
+	 */
+	protected function getContainer(): ?ContainerInterface
+	{
+		return $this->service_container ?? ContainerBuilder::locateContainer( $this->package );
+	}
+	/**
+	 * Get service definitions to add to service container
 	 *
 	 * @return array<string, mixed>
 	 */
-	protected function getServiceDefinitions(): array
+	public static function getServiceDefinitions(): array
 	{
 		return [
-			'app.package'                  => $this->package,
-			'app.url'                      => $this->url,
-			'app.dir'                      => $this->dir,
-			'assets.url'                   => 'dist',
-			'assets.dir'                   => 'dist',
-			'views.dir'                    => 'views',
-			Controllers\Dispatchers::class => ContainerBuilder::autowire(),
-			Controllers\Routes::class      => ContainerBuilder::autowire(),
-			Controllers\Services::class    => ContainerBuilder::autowire(),
+			Controllers\Handlers::class => ContainerBuilder::autowire(),
+			Controllers\Routes::class   => ContainerBuilder::autowire(),
+			Controllers\Services::class => ContainerBuilder::autowire(),
 		];
-	}
-	/**
-	 * Mount the plugin
-	 *
-	 * @return void
-	 */
-	/**
-	 * Undocumented function
-	 *
-	 * @param string $package : name of the package this instance belongs to.
-	 * @param string $root_file : path to root file of the plugin.
-	 *
-	 * @return self
-	 */
-	public static function mount( string $package = '', string $root_file = '' ): static
-	{
-		$instance = new static( $package, $root_file );
-
-		$instance->onMount();
-
-		return $instance;
 	}
 	/**
 	 * Fire Mounted action on mount
@@ -215,9 +253,9 @@ class Main extends Abstracts\Mountable implements Interfaces\Main
 	 */
 	protected function mountControllers(): void
 	{
-		$this->service_container->get( Controllers\Services::class );
-		$this->service_container->get( Controllers\Routes::class );
-		$this->service_container->get( Controllers\Dispatchers::class );
+		foreach( self::getServiceDefinitions() as $key => $value ) {
+			$this->service_container->get( $key );
+		}
 	}
 	/**
 	 * Check if a particular route exists

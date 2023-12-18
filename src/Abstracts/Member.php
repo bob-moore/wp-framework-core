@@ -47,7 +47,7 @@ abstract class Member implements Interfaces\Member
 	 * @return void
 	 */
 	#[Inject]
-	public function setPackage( #[Inject( 'app.package' )] string $package ): void
+	public function setPackage( #[Inject( 'config.package' )] string $package ): void
 	{
 		$this->package = strtolower( str_replace( [ '\\', '/', ' ' ], '_', trim( $package ) ) );
 	}

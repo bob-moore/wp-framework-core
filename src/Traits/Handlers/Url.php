@@ -40,7 +40,7 @@ trait Url
 	 * @return void
 	 */
 	#[Inject]
-	public function setUrl( #[Inject( 'app.url' )] string $url, string $append = '' ): void
+	public function setUrl( #[Inject( 'config.url' )] string $url, string $append = '' ): void
 	{
 		$this->url = $this->appendUrl( $url, $append );
 	}

@@ -79,7 +79,7 @@ class Compiler extends Abstracts\Mountable implements Interfaces\Services\Compil
 	 * @return void
 	 */
 	#[Inject]
-	public function setViewsDirectory( #[Inject( 'views.dir' )] string $views_dir ): void
+	public function setViewsDirectory( #[Inject( 'config.views.dir' )] string $views_dir ): void
 	{
 		$this->views_dir = $views_dir;
 	}
@@ -91,7 +91,7 @@ class Compiler extends Abstracts\Mountable implements Interfaces\Services\Compil
 	 * @return void
 	 */
 	#[Inject]
-	public function setAssetsDirectory( #[Inject( 'assets.dir' )] string $asset_dir ): void
+	public function setAssetsDirectory( #[Inject( 'config.assets.dir' )] string $asset_dir ): void
 	{
 		$this->assets_dir = $asset_dir;
 	}

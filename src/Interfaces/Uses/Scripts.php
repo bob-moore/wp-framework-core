@@ -1,6 +1,6 @@
 <?php
 /**
- * Script Dispatcher interface definition
+ * Used Scripts interface definition
  *
  * PHP Version 8.0.28
  *
@@ -11,35 +11,33 @@
  * @since   1.0.0
  */
 
-namespace Devkit\WPCore\Interfaces\Dispatchers;
+namespace Devkit\WPCore\Interfaces\Uses;
+
+use Devkit\WPCore\Interfaces;
 
 /**
- * Service interface
+ * Uses\Scripts interface
  *
- * Used to type hint against Devkit\WPCore\Interfaces\Dispatchers\Scripts.
+ * Used to type hint against Devkit\WPCore\Interfaces\Uses\Scripts.
  *
  * @subpackage Interfaces
  */
 interface Scripts
 {
 	/**
-	 * Enqueue a script in the build/dist directories
+	 * Setter for the script dispatcher
 	 *
-	 * @param string             $handle : handle to register.
-	 * @param string             $path : relative path to script.
-	 * @param array<int, string> $dependencies : any set dependencies not in assets file, optional.
-	 * @param string             $version : version of JS file, optional.
-	 * @param boolean            $in_footer : whether to enqueue in footer, optional.
+	 * @param Interfaces\Handlers\Scripts $script_dispatcher : instance of script dispatcher.
 	 *
 	 * @return void
 	 */
-	public function enqueue(
-		string $handle,
-		string $path,
-		array $dependencies = [],
-		string $version = '',
-		$in_footer = true
-	): void;
+	public function setScriptHandler( Interfaces\Handlers\Scripts $script_dispatcher ): void;
+	/**
+	 * Getter for the script dispatcher
+	 *
+	 * @return Interfaces\Handlers\Scripts|null
+	 */
+	public function getScriptHandler(): ?Interfaces\Handlers\Scripts;
 	/**
 	 * Register a JS file with WordPress
 	 *
@@ -49,13 +47,13 @@ interface Scripts
 	 * @param string             $version : version of JS file, optional.
 	 * @param boolean            $in_footer : whether to enqueue in footer, optional.
 	 *
-	 * @return string
+	 * @return void
 	 */
-	public function register(
+	public function enqueueScript(
 		string $handle,
 		string $path,
 		array $dependencies = [],
 		string $version = '',
 		$in_footer = true
-	): string;
+	): void;
 }

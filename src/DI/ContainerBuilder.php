@@ -15,9 +15,12 @@ namespace Devkit\WPCore\DI;
 
 use Devkit\WPCore\Helpers,
 	Devkit\WPCore\Interfaces,
-	Devkit\WPCore\Deps,
-	DI\Definition\Source\DefinitionSource,
+	Devkit\WPCore\Deps;
+
+use DI\Definition\Source\DefinitionSource,
 	DI\Definition\Reference,
+	DI\Definition\StringDefinition,
+	DI\Definition\ValueDefinition,
 	DI\Definition\Helper;
 
 use Psr\Container\ContainerInterface;
@@ -80,17 +83,44 @@ class ContainerBuilder extends \DI\ContainerBuilder
 	 */
 	public function addDefinitions( string|array|DefinitionSource ...$definitions ): self
 	{
-		$controller_definitions = [];
+		$extended_definitions = [];
 
 		foreach ( $definitions as $definition ) {
-			$controller_definitions += $this->autowireControllers( $definition );
+			$extended_definitions += $this->autowireControllers( $definition );
+			$extended_definitions += $this->addNestedDefinitions( $definition );
 		}
 
 		parent::addDefinitions( ...$definitions );
 
-		parent::addDefinitions( $controller_definitions );
+		parent::addDefinitions( $extended_definitions );
 
 		return $this;
+	}
+	/**
+	 * Extend array definitions to include nested definitions.
+	 *
+	 * @param mixed   $definitions : definitions to extend.
+	 * @param string  $key : optional key, used in recursion.
+	 *
+	 * @return mixed
+	 */
+	public function addNestedDefinitions( mixed $definitions, string $key = '', int $iterations = 0 ): mixed
+	{
+		$extended_definitions = [];
+
+		if ( is_array( $definitions ) ) {
+			++$iterations;
+			foreach ( $definitions as $nested_key => $definition ) {
+				$extended_definitions += $this->addNestedDefinitions( $definition, ! empty( $key ) ? $key . '.' . $nested_key : $nested_key, $iterations );
+			}
+		}
+		elseif ( ! is_object( $definitions ) ) {
+			$extended_definitions[ $key ] = $definitions;
+		}
+		elseif ( 1 < $iterations ) {
+			$extended_definitions[ $key ] = $definitions;
+		}
+		return $extended_definitions;
 	}
 	/**
 	 * Auto wire controllers
@@ -190,4 +220,27 @@ class ContainerBuilder extends \DI\ContainerBuilder
 	{
 		return \DI\decorate( $decorator );
 	}
+	    /**
+     * Helper for concatenating strings.
+     *
+     * Example:
+     *
+     *     'log.filename' => DI\string('{app.path}/app.log')
+     *
+     * @param string $expression A string expression. Use the `{}` placeholders to reference other container entries.
+     *
+     * @since 5.0
+     */
+    public static function string( string $expression ) : StringDefinition
+    {
+		return \DI\string( $expression );
+    }
+
+	/**
+     * Helper for defining a value.
+     */
+    public static function value( mixed $value ) : ValueDefinition
+    {
+        return \DI\value( $value );
+    }
 }

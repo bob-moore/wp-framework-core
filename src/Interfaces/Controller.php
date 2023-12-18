@@ -22,7 +22,7 @@ namespace Devkit\WPCore\Interfaces;
 interface Controller
 {
 	/**
-	 * Undocumented function
+	 * Return an array of service definitions
 	 *
 	 * @return array<string, mixed>
 	 */

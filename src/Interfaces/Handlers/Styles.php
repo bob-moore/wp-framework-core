@@ -11,12 +11,12 @@
  * @since   1.0.0
  */
 
-namespace Devkit\WPCore\Interfaces\Dispatchers;
+namespace Devkit\WPCore\Interfaces\Handlers;
 
 /**
- * Dispatcher\Style interface
+ * Handlers\Style interface
  *
- * Used to type hint against Devkit\WPCore\Interfaces\Dispatchers\Styles.
+ * Used to type hint against Devkit\WPCore\Interfaces\Handlers\Styles.
  *
  * @subpackage Interfaces
  */

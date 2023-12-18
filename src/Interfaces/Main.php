@@ -12,6 +12,7 @@
  */
 
 namespace Devkit\WPCore\Interfaces;
+use Psr\Container\ContainerInterface;
 
 /**
  * Main interface requirements
@@ -21,10 +22,35 @@ namespace Devkit\WPCore\Interfaces;
 interface Main
 {
 	/**
-	 * Constructor for new instance of plugin
+	 * Default constructor
 	 *
-	 * @param string $package : name of the package this instance belongs to.
-	 * @param string $root_file : path to root file of the plugin.
+	 * @param array $config : configuration array to merge with defaults.
 	 */
-	public function __construct( string $package = '', string $root_file = '' );
+	public function __construct( array $config = [] );
+		/**
+	 * Helper function to mount new instance of class
+	 *
+	 * @param array $config : configuration array to merge with defaults.
+	 *
+	 * @return self
+	 */
+	public static function mount( array $config = [] ): static;
+		/**
+	 * Setter for service container
+	 *
+	 * @param ContainerInterface $container : instance of service container.
+	 *
+	 * @return void
+	 */
+	public function setContainer( ContainerInterface $container ): void;
+		/**
+	 * Locate a specific service
+	 *
+	 * Use primarily by 3rd party interactions to remove actions/filters
+	 *
+	 * @param string $service : name of service to locate.
+	 *
+	 * @return mixed
+	 */
+	public static function locateService( string $service, string $package = '' ): mixed;
 }

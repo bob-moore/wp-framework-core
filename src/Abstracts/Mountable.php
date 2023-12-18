@@ -14,6 +14,7 @@
 namespace Devkit\WPCore\Abstracts;
 
 use Devkit\WPCore\Interfaces,
+	Devkit\WPCore\Helpers,
 	Devkit\WPCore\DI\OnMount;
 
 /**
@@ -39,7 +40,7 @@ abstract class Mountable extends Member implements Interfaces\Mountable
 	protected function slug(): string
 	{
 		if ( ! isset( $this->slug ) ) {
-			$this->slug = strtolower( str_replace( [ '\\', '/', ' ' ], '_', static::class ) );
+			$this->slug = Helpers::slugify( static::class );
 		}
 		return $this->slug;
 	}

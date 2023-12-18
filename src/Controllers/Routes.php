@@ -34,9 +34,9 @@ class Routes extends Abstracts\Mountable implements Interfaces\Controller
 	public static function getServiceDefinitions(): array
 	{
 		return [
-			'route.frontend' => ContainerBuilder::autowire( Route\Frontend::class ),
-			'route.admin'    => ContainerBuilder::autowire( Route\Frontend::class ),
-			'route.login'    => ContainerBuilder::autowire( Route\Frontend::class ),
+			// 'route.frontend' => ContainerBuilder::autowire( Route\Frontend::class ),
+			// 'route.admin'    => ContainerBuilder::autowire( Route\Frontend::class ),
+			// 'route.login'    => ContainerBuilder::autowire( Route\Frontend::class ),
 		];
 	}
 	/**
@@ -80,6 +80,7 @@ class Routes extends Abstracts\Mountable implements Interfaces\Controller
 		$has_route = apply_filters( "{$this->package}_has_route", false, $alias );
 
 		if ( ! $this->routeHasLoaded() && $has_route ) {
+			
 			do_action( "{$this->package}_load_route", $alias, $route );
 		}
 		do_action( "{$this->package}_route_{$route}", $alias );

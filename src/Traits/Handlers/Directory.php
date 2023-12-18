@@ -41,7 +41,7 @@ trait Directory
 	 * @return void
 	 */
 	#[Inject]
-	public function setDir( #[Inject( 'app.dir' )] string $dir, string $append = '' ): void
+	public function setDir( #[Inject( 'config.dir' )] string $dir, string $append = '' ): void
 	{
 		$this->dir = $this->appendDir( $dir, $append );
 	}

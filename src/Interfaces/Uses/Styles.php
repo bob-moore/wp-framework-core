@@ -22,22 +22,22 @@ use Devkit\WPCore\Interfaces;
  *
  * @subpackage Interfaces
  */
-interface StyleDispatcher
+interface Styles
 {
 	/**
 	 * Setter for the style dispatcher
 	 *
-	 * @param Interfaces\Dispatchers\Styles $style_dispatcher : instance of style dispatcher.
+	 * @param Interfaces\Handlers\Styles $style_dispatcher : instance of style dispatcher.
 	 *
 	 * @return void
 	 */
-	public function setStyleDispatcher( Interfaces\Dispatchers\Styles $style_dispatcher ): void;
+	public function setStyleHandler( Interfaces\Handlers\Styles $style_dispatcher ): void;
 	/**
 	 * Getter for style dispatcher
 	 *
-	 * @return Interfaces\Dispatchers\Styles|null
+	 * @return Interfaces\Handlers\Styles|null
 	 */
-	public function getStyleDispatcher(): ?Interfaces\Dispatchers\Styles;
+	public function getStyleHandler(): ?Interfaces\Handlers\Styles;
 	/**
 	 * Enqueue a style in the dist/build directories
 	 *
