@@ -1,7 +1,7 @@
 {
     "name": "devkit/wp-framework-core",
     "description": "WP Plugin/Theme Core Framework",
-	"version": "1.0.0",
+	"version": "1.1.0",
     "type": "library",
     "minimum-stability": "stable",
     "license": "GPL-2.0-or-later",
