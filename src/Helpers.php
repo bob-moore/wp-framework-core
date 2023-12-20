@@ -4,7 +4,7 @@
  *
  * PHP Version 8.0.28
  *
- * @package WP Plugin Skeleton
+ * @package Devkit_WP_Framework
  * @author  Bob Moore <bob@bobmoore.dev>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @link    https://github.com/bob-moore/wp-framework-core
@@ -188,7 +188,7 @@ class Helpers
 	 */
 	public static function slugify( string $raw_string ): string
 	{
-		return strtolower( str_replace( [ '\\', '/', ' ' ], '_', $raw_string ) );
+		return strtolower( str_replace( [ '\\', '/', ' ', '-' ], '_', $raw_string ) );
 	}
 	/**
 	 * Attempt to infer the plugin directory for this application.
@@ -197,20 +197,20 @@ class Helpers
 	 */
 	public static function defaultPluginDir(): string
 	{
-		$base = str_replace( trailingslashit( WP_PLUGIN_DIR ), '', dirname( __FILE__ ) );
+		$base = str_replace( trailingslashit( WP_PLUGIN_DIR ), '', __DIR__ );
 
 		$parts = explode( '/', $base );
 
 		return trailingslashit( WP_PLUGIN_DIR ) . $parts[0] . '/';
 	}
 		/**
-	 * Recursively search an array for a pipe seperated value. Pipe is used to search nested arrays as many levels deep
-	 * as necessary, until no more search terms are available or the value is found.
-	 *
-	 * @param array $haystack array to search in
-	 * @param array|string $needle needle to look for, reduced until single value. Array or pipe seperated string
-	 * @return mixed|null
-	 */
+		 * Recursively search an array for a pipe seperated value. Pipe is used to search nested arrays as many levels deep
+		 * as necessary, until no more search terms are available or the value is found.
+		 *
+		 * @param array $haystack array to search in
+		 * @param array|string $needle needle to look for, reduced until single value. Array or pipe seperated string
+		 * @return mixed|null
+		 */
 	/**
 	 * Search an array using string notation
 	 *
@@ -222,24 +222,84 @@ class Helpers
 	 */
 	public static function searchArray( array $haystack, string|array $needle, $separator = '.' ): mixed
 	{
-		if ( is_string( $needle ) )
-		{
+		if ( is_string( $needle ) ) {
 			$needle = explode( $separator, $needle );
 		}
 
 		$current = array_shift( $needle );
 
-		if ( empty( $needle ) )
-		{
+		if ( empty( $needle ) ) {
 			return $haystack[ $current ] ?? null;
-		}
-		elseif ( ! isset( $haystack[ $current ] ) || ! is_array( $haystack[ $current ] ) )
-		{
+		} elseif ( ! isset( $haystack[ $current ] ) || ! is_array( $haystack[ $current ] ) ) {
 			return null;
-		}
-		else
-		{
+		} else {
 			return self::searchArray( $haystack[ $current ], $needle );
 		}
+	}
+	/**
+	 * Infer the type of package this is being used in.
+	 *
+	 * @return string
+	 */
+	public static function packageType(): string
+	{
+		$path = realpath( __DIR__ );
+
+		return match ( true ) {
+			str_contains( $path, WP_PLUGIN_DIR ) => 'plugin',
+			str_contains( $path, get_stylesheet_directory() )
+			&& ! str_contains( $path, get_template_directory() ) => 'child-theme',
+			str_contains( $path, get_template_directory() ) => 'theme',
+			default => 'child-theme',
+		};
+	}
+
+	/**
+	 * Infer default directory based on type.
+	 *
+	 * @param string|null $package_type : the package type to use.
+	 *
+	 * @return string
+	 */
+	public static function getDefaultDir( ?string $package_type = null ): string
+	{
+		return match ( $package_type ?? self::packageType() ) {
+			'plugin'      => self::defaultPluginDir(),
+			'theme'       => untrailingslashit( get_template_directory() ),
+			'child-theme' => untrailingslashit( get_stylesheet_directory() ),
+			default       => untrailingslashit( get_stylesheet_directory() ),
+		};
+	}
+	/**
+	 * Infer url based on type.
+	 *
+	 * @param string|null $dir : the base directory to use.
+	 * @param string|null $package_type : the package type to use.
+	 *
+	 * @return string
+	 */
+	public static function getDefaultUrl( ?string $dir = null, ?string $package_type = null ): string
+	{
+		return match ( $package_type ?? self::packageType() ) {
+			'plugin'      => plugin_dir_url(
+				trailingslashit(
+					trailingslashit( $dir ?? self::getDefaultDir( $package_type ) ) . '*.php'
+				)
+			),
+			'theme'       => untrailingslashit( get_template_directory_uri() ),
+			'child-theme' => untrailingslashit( get_stylesheet_directory_uri() ),
+			default       => untrailingslashit( get_stylesheet_directory_uri() ),
+		};
+	}
+	/**
+	 * Log an item to query monitor
+	 *
+	 * @param mixed $item : the thing to log.
+	 *
+	 * @return void
+	 */
+	public static function debug( mixed $item ): void
+	{
+		do_action( 'qm/debug', $item );
 	}
 }

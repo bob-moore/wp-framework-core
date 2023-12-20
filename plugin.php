@@ -33,8 +33,8 @@ defined( 'ABSPATH' ) || exit;
 require_once trailingslashit( plugin_dir_path( __FILE__ ) ) . 'vendor/autoload.php';
 
 Main::mount( [
-    'package' => 'devkit_wp_core',
-    'type'    => 'plugin',
-    'assets'  => [ 'dir' => '/dist' ],
-    'views'   => [ 'dir' => '/views' ]
+    // 'package' => 'devkit_wp_core',
+    // 'type'    => 'plugin',
+    // 'assets'  => [ 'dir' => '/dist' ],
+    // 'views'   => [ 'dir' => '/views' ]
 ] );

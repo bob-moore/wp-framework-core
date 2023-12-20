@@ -4,7 +4,7 @@
  *
  * PHP Version 8.0.28
  *
- * @package WP Plugin Skeleton
+ * @package Devkit_WP_Framework
  * @author  Bob Moore <bob@bobmoore.dev>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @link    https://github.com/bob-moore/wp-framework-core
@@ -20,6 +20,7 @@ use Devkit\WPCore\Helpers,
 use DI\Definition\Source\DefinitionSource,
 	DI\Definition\Reference,
 	DI\Definition\StringDefinition,
+	DI\Definition\ArrayDefinition,
 	DI\Definition\ValueDefinition,
 	DI\Definition\Helper;
 
@@ -83,83 +84,65 @@ class ContainerBuilder extends \DI\ContainerBuilder
 	 */
 	public function addDefinitions( string|array|DefinitionSource ...$definitions ): self
 	{
-		$extended_definitions = [];
-
 		foreach ( $definitions as $definition ) {
-			$extended_definitions += $this->autowireControllers( $definition );
-			$extended_definitions += $this->addNestedDefinitions( $definition );
+			
+			$definition = $this->parseDefinitions( $definition );
+
+			parent::addDefinitions( $definition );
 		}
-
-		parent::addDefinitions( ...$definitions );
-
-		parent::addDefinitions( $extended_definitions );
 
 		return $this;
 	}
 	/**
-	 * Extend array definitions to include nested definitions.
+	 * Flatten nested arrays and autowire controllers.
 	 *
-	 * @param mixed   $definitions : definitions to extend.
-	 * @param string  $key : optional key, used in recursion.
+	 * @param mixed $definition : definition array or object.
+	 * @param string $key : optional key for recursion, and to check for controller definitions.
+	 *
+	 * @return array
+	 */
+	protected function parseDefinitions( mixed $definition, string $key = '' ) : array
+	{
+		$definitions = [];
+
+		if ( is_array( $definition ) ) {
+			foreach ( $definition as $nested_key => $nested_definition ) {
+				$definitions = array_merge(
+					$definitions,
+					$this->parseDefinitions( $nested_definition, $nested_key )
+				);
+			}
+		} else {
+			$definitions[ $key ] = $definition;
+			/**
+			 * Auto-wiring of nested arrays
+			 */
+			if ( $definition instanceof ArrayDefinitionHelper ) {
+				$definitions = array_merge( $definition->getNestedValues( $key ) );
+			}
+			/**
+			 * Auto-wiring of controllers
+			 */
+			elseif ( $definition instanceof AutowireDefinitionHelper ) {
+				$children = $definition->autoWireChildren( $key );
+
+				$definitions[ $key ] = $definition;
+	
+				$definitions = array_merge( $definitions, $this->parseDefinitions( $children, $key ) );
+			}
+		}
+		return $definitions;
+	}
+	/**
+	 * Helper for defining an array.
+	 *
+	 * @param array $definition : array to define.
 	 *
 	 * @return mixed
 	 */
-	public function addNestedDefinitions( mixed $definitions, string $key = '', int $iterations = 0 ): mixed
+	public static function array( array $definition ): ArrayDefinitionHelper
 	{
-		$extended_definitions = [];
-
-		if ( is_array( $definitions ) ) {
-			++$iterations;
-			foreach ( $definitions as $nested_key => $definition ) {
-				$extended_definitions += $this->addNestedDefinitions( $definition, ! empty( $key ) ? $key . '.' . $nested_key : $nested_key, $iterations );
-			}
-		}
-		elseif ( ! is_object( $definitions ) ) {
-			$extended_definitions[ $key ] = $definitions;
-		}
-		elseif ( 1 < $iterations ) {
-			$extended_definitions[ $key ] = $definitions;
-		}
-		return $extended_definitions;
-	}
-	/**
-	 * Auto wire controllers
-	 *
-	 * @param string|array<string, mixed>|DefinitionSource|Helper\DefinitionHelper $definition : definition(s).
-	 * @param string                                                               $key : optional key, used in recursion.
-	 *
-	 * @return array<string, mixed>
-	 */
-	protected function autowireControllers(
-		string|array|DefinitionSource|Helper\DefinitionHelper $definition,
-		string $key = ''
-	): array {
-		$extended_definitions = [];
-
-		if ( is_array( $definition ) ) {
-			foreach ( $definition as $key => $definitions ) {
-				$extended_definitions += $this->autowireControllers( $definitions, $key );
-			}
-		} elseif (
-			is_object( $definition )
-			&& is_subclass_of( $definition, Helper\DefinitionHelper::class )
-			&& ! empty( $key )
-		) {
-			$definition_object = $definition->getDefinition( $key );
-
-			if (
-				is_object( $definition_object )
-				&& method_exists( $definition_object, 'getClassName' )
-			) {
-				$class_name = $definition_object->getClassName();
-
-				if ( Helpers::implements( $class_name, Interfaces\Controller::class ) ) {
-					$extended_definitions = $class_name::getServiceDefinitions();
-				}
-			}
-		}
-
-		return $extended_definitions;
+		return new ArrayDefinitionHelper( $definition );
 	}
 	/**
 	 * Wrapper for parent auto wire function. Only used for simplicity
@@ -170,7 +153,7 @@ class ContainerBuilder extends \DI\ContainerBuilder
 	 */
 	public static function autowire( string $class_name = null ): Helper\DefinitionHelper
 	{
-		return \DI\autowire( $class_name );
+		return new AutowireDefinitionHelper( $class_name );
 	}
 	/**
 	 * Helper for defining an object.
@@ -220,7 +203,7 @@ class ContainerBuilder extends \DI\ContainerBuilder
 	{
 		return \DI\decorate( $decorator );
 	}
-	    /**
+	/**
      * Helper for concatenating strings.
      *
      * Example:

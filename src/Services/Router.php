@@ -4,7 +4,7 @@
  *
  * PHP Version 8.0.28
  *
- * @package WP Plugin Skeleton
+ * @package Devkit_WP_Framework
  * @author  Bob Moore <bob@bobmoore.dev>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @link    https://github.com/bob-moore/wp-framework-core
@@ -14,7 +14,8 @@
 namespace Devkit\WPCore\Services;
 
 use Devkit\WPCore\Abstracts,
-	Devkit\WPCore\Interfaces;
+	Devkit\WPCore\Interfaces,
+	Devkit\WPCore\DI\OnMount;
 
 /**
  * Service class for router actions
@@ -29,6 +30,18 @@ class Router extends Abstracts\Mountable implements Interfaces\Services\Router
 	 * @var array<int, string>
 	 */
 	protected array $routes = [];
+	// /**
+	//  * Fire Mounted action on mount
+	//  *
+	//  * @return void
+	//  */
+	// #[OnMount]
+	// public function mount(): void
+	// {
+	// 	if ( ! $this->hasMounted() ) {
+	// 		do_action( "{$this->slug()}_mounted" );
+	// 	}
+	// }
 	/**
 	 * Define current route(s)
 	 *
@@ -49,32 +62,34 @@ class Router extends Abstracts\Mountable implements Interfaces\Services\Router
 			is_admin() => [ 'admin' ],
 			default => []
 		};
+
+		if ( ! is_admin() && ! is_login() ) {
+			array_unshift( $routes, 'frontend' );
+		}
+
 		return array_reverse( apply_filters( "{$this->package}_routes", $routes ) );
 	}
 	/**
 	 * Getter for routes
-	 * 
-	 * @param array<string> $default_routes : routes to prepend to the list.
 	 *
 	 * @return array<string>
 	 */
-	public function getRoutes( array $default_routes = [] ): array
+	public function getRoutes(): array
 	{
 		if ( empty( $this->routes ) ) {
 			$this->routes = $this->defineRoutes();
 		}
-
-		return ! empty( $default_routes )
-		? array_merge( $default_routes, $this->routes )
-		: $this->routes;
+		return $this->routes;
 	}
 	/**
-	 * Fire router ready action
+	 * Setter for $route
 	 *
 	 * @return void
 	 */
-	public function dispatchRoutes(): void
+	public function route(): void
 	{
-		do_action( "{$this->package}_router_ready", $this->getRoutes() );
+		foreach ( $this->getRoutes() as $route ) {
+			do_action( "{$this->package}_trigger_route", $route );
+		}
 	}
 }

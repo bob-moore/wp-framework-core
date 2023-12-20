@@ -4,7 +4,7 @@
  *
  * PHP Version 8.0.28
  *
- * @package WP Plugin Skeleton
+ * @package Devkit_WP_Framework
  * @author  Bob Moore <bob@bobmoore.dev>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @link    https://github.com/bob-moore/wp-framework-core
@@ -17,6 +17,9 @@ use Devkit\WPCore\DI\ContainerBuilder,
 	Devkit\WPCore\Abstracts,
 	Devkit\WPCore\Interfaces,
 	Devkit\WPCore\DI\OnMount,
+	Devkit\WPCore\Services,
+	Devkit\WPCore\Helpers,
+	Devkit\WPCore\Main,
 	Devkit\WPCore\Routes as Route;
 
 /**
@@ -34,10 +37,30 @@ class Routes extends Abstracts\Mountable implements Interfaces\Controller
 	public static function getServiceDefinitions(): array
 	{
 		return [
-			// 'route.frontend' => ContainerBuilder::autowire( Route\Frontend::class ),
-			// 'route.admin'    => ContainerBuilder::autowire( Route\Frontend::class ),
-			// 'route.login'    => ContainerBuilder::autowire( Route\Frontend::class ),
+			Services\Router::class            => ContainerBuilder::autowire(),
+			Interfaces\Services\Router::class => ContainerBuilder::get( Services\Router::class ),
+			'route'                           => ContainerBuilder::array(
+				[
+					'frontend' => ContainerBuilder::autowire( Route\Frontend::class ),
+					'admin'    => ContainerBuilder::autowire( Route\Frontend::class ),
+					'login'    => ContainerBuilder::autowire( Route\Frontend::class ),
+				]
+			)
 		];
+	}
+	/**
+	 * Mount router functions/filters
+	 *
+	 * @param Interfaces\Services\Router $router : instance of router service.
+	 *
+	 * @return void
+	 */
+	#[OnMount]
+	public function mountRouter( Interfaces\Services\Router $router ): void
+	{
+		add_action( 'wp', [ $router, 'route' ] );
+		add_action( 'admin_init', [ $router, 'route' ] );
+		add_action( 'login_init', [ $router, 'route' ] );
 	}
 	/**
 	 * Mount router functions/filters
@@ -47,51 +70,43 @@ class Routes extends Abstracts\Mountable implements Interfaces\Controller
 	#[OnMount]
 	public function mount(): void
 	{
-		add_action( "{$this->package}_router_ready", [ $this, 'route' ] );
+		add_action( "{$this->package}_trigger_route", [ $this, 'route' ] );
 	}
 	/**
 	 * Setter for $route
 	 *
 	 * @return void
 	 */
-	public function route( array $routes ): void
+	public function route( string $route ): void
 	{
-		foreach ( $routes as $route ) {
-			$this->mountRoute( $route );
-		}
-		/**
-		 * Final check to load frontend if nothing has loaded at this point
-		 */
-		if ( ! $this->routeHasLoaded() && ! is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() ) {
-			$this->mountRoute( 'frontend' );
+		$alias = 'route.' . strtolower( $route );
+		if ( $this->routeExists( $alias ) && ! $this->routeHasMounted() ) {
+			$route_instance = Main::locateService( $alias, $this->package );
+			do_action( "{$this->package}_route_mounted", $alias, $route_instance );
+			do_action( "{$this->package}_{$route}_mounted", $route_instance );
 		}
 	}
 	/**
-	 * Load a singular route
+	 * Check if a route exists
 	 *
-	 * @param string $route : string route name.
+	 * @param string $route_alias : string name of route to check.
 	 *
-	 * @return void
+	 * @return boolean
 	 */
-	protected function mountRoute( string $route ): void
+	public function routeExists( string $route_alias ): bool
 	{
-		$alias = 'route.' . strtolower( $route );
-
-		$has_route = apply_filters( "{$this->package}_has_route", false, $alias );
-
-		if ( ! $this->routeHasLoaded() && $has_route ) {
-			
-			do_action( "{$this->package}_load_route", $alias, $route );
-		}
-		do_action( "{$this->package}_route_{$route}", $alias );
+		return apply_filters( "{$this->package}_has_route",
+			Main::hasService( $route_alias, $this->package ),
+			$route_alias
+		);
 	}
 	/**
 	 * Determine if a route has already been loaded
 	 *
 	 * @return int
 	 */
-	public function routeHasLoaded(): int
+	public function routeHasMounted(): int
 	{
-		return did_action( "{$this->package}_route_loaded" );
+		return did_action( "{$this->package}_route_mounted" );
 	}
 }

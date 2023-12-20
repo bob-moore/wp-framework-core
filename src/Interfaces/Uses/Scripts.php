@@ -4,7 +4,7 @@
  *
  * PHP Version 8.0.28
  *
- * @package WP Plugin Skeleton
+ * @package Devkit_WP_Framework
  * @author  Bob Moore <bob@bobmoore.dev>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @link    https://github.com/bob-moore/wp-framework-core
@@ -25,15 +25,15 @@ use Devkit\WPCore\Interfaces;
 interface Scripts
 {
 	/**
-	 * Setter for the script dispatcher
+	 * Setter for the script handler
 	 *
-	 * @param Interfaces\Handlers\Scripts $script_dispatcher : instance of script dispatcher.
+	 * @param Interfaces\Handlers\Scripts $script_handler : instance of script handler.
 	 *
 	 * @return void
 	 */
-	public function setScriptHandler( Interfaces\Handlers\Scripts $script_dispatcher ): void;
+	public function setScriptHandler( Interfaces\Handlers\Scripts $script_handler = null ): void;
 	/**
-	 * Getter for the script dispatcher
+	 * Getter for the script handler
 	 *
 	 * @return Interfaces\Handlers\Scripts|null
 	 */

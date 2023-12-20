@@ -4,7 +4,7 @@
  *
  * PHP Version 8.0.28
  *
- * @package WP Plugin Skeleton
+ * @package Devkit_WP_Framework
  * @author  Bob Moore <bob@bobmoore.dev>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @link    https://github.com/bob-moore/wp-framework-core
@@ -25,15 +25,15 @@ use Devkit\WPCore\Interfaces;
 interface Styles
 {
 	/**
-	 * Setter for the style dispatcher
+	 * Setter for the style handler
 	 *
-	 * @param Interfaces\Handlers\Styles $style_dispatcher : instance of style dispatcher.
+	 * @param Interfaces\Handlers\Styles $style_handler : instance of style handler.
 	 *
 	 * @return void
 	 */
-	public function setStyleHandler( Interfaces\Handlers\Styles $style_dispatcher ): void;
+	public function setStyleHandler( Interfaces\Handlers\Styles $style_handler = null ): void;
 	/**
-	 * Getter for style dispatcher
+	 * Getter for style handler
 	 *
 	 * @return Interfaces\Handlers\Styles|null
 	 */

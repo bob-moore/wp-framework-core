@@ -4,7 +4,7 @@
  *
  * PHP Version 8.0.28
  *
- * @package WP Plugin Skeleton
+ * @package Devkit_WP_Framework
  * @author  Bob Moore <bob@bobmoore.dev>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @link    https://github.com/bob-moore/wp-framework-core
@@ -24,16 +24,14 @@ interface Router
 {
 	/**
 	 * Getter for routes
-	 * 
-	 * @param array<string> $default_routes : routes to prepend to the list.
 	 *
 	 * @return array<string>
 	 */
-	public function getRoutes( array $default_routes = [] ): array;
+	public function getRoutes(): array;
 	/**
-	 * Fire router ready action
+	 * Fire actions to load routes
 	 *
 	 * @return void
 	 */
-	public function dispatchRoutes(): void;
+	public function route(): void;
 }

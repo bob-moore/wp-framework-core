@@ -4,7 +4,7 @@
  *
  * PHP Version 8.0.28
  *
- * @package WP Plugin Skeleton
+ * @package Devkit_WP_Framework
  * @author  Bob Moore <bob@bobmoore.dev>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @link    https://github.com/bob-moore/wp-framework-core
@@ -21,6 +21,8 @@ use Devkit\WPCore\DI\ContainerBuilder,
 	Devkit\WPCore\Abstracts,
 	Devkit\WPCore\Helpers;
 
+use Timber\Timber;
+
 /**
  * Controls the registration and execution of services
  *
@@ -35,33 +37,21 @@ class Services extends Abstracts\Mountable implements Interfaces\Controller
 	 */
 	public static function getServiceDefinitions(): array
 	{
-		return [
-			/**
-			 * Class implementations
-			 */
-			Service\Router::class               => ContainerBuilder::autowire(),
-			Service\Compiler::class             => ContainerBuilder::autowire(),
-			/**
-			 * Interfaces mapping
-			 */
-			Interfaces\Services\Router::class   => ContainerBuilder::get( Service\Router::class ),
-			Interfaces\Services\Compiler::class => ContainerBuilder::get( Service\Compiler::class ),
-		];
-	}
-	/**
-	 * Mount router functions/filters
-	 *
-	 * @param Interfaces\Services\Router $router : instance of router service.
-	 *
-	 * @return void
-	 */
-	#[OnMount]
-	public function mountRouter( Interfaces\Services\Router $router ): void
-	{
-		add_action( 'wp', [ $router, 'dispatchRoutes' ] );
-		add_action( 'admin_init', [ $router, 'dispatchRoutes' ] );
-		add_action( 'login_init', [ $router, 'dispatchRoutes' ] );
-		add_filter( "{$this->package}_get_routes", [ $router, 'getRoutes' ] );
+		$config = [];
+
+		if ( class_exists( Timber::class ) ) {
+			$config .= [
+				/**
+				 * Class implementations
+				 */
+				Service\Compiler::class             => ContainerBuilder::autowire(),
+				/**
+				 * Interfaces mapping
+				 */
+				Interfaces\Services\Compiler::class => ContainerBuilder::get( Service\Compiler::class ),
+			];
+		}
+		return $config;
 	}
 	/**
 	 * Mount compiler filters & add twig functions
