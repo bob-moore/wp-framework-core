@@ -93,8 +93,8 @@ class Main extends Abstracts\Mountable implements Interfaces\Main, Interfaces\Co
 			'dir' => untrailingslashit( 
 					ltrim( 
 						$config['assets']['dir'] 
-						?? $config['assets'] 
-						?? 'dist', '/'
+						?? is_string( $config['assets'] ?? false ) ? $config['assets'] : 'dist',
+						'/' 
 					)
 				),
 			'url' => ContainerBuilder::string( '{config.url}/{config.assets.dir}' ),
@@ -102,8 +102,9 @@ class Main extends Abstracts\Mountable implements Interfaces\Main, Interfaces\Co
 		$views  = [
 			'dir' => untrailingslashit( 
 				ltrim( 
-					$config['views']['dir'] 
-					?? 'views', '/' 
+					$config['views']['dir']
+					?? is_string( $config['views'] ?? false ) ? $config['assets'] : 'views',
+					'/' 
 				)
 			),
 		];
