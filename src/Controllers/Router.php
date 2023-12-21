@@ -27,7 +27,7 @@ use Devkit\WPCore\DI\ContainerBuilder,
  *
  * @subpackage Controllers
  */
-class Routes extends Abstracts\Mountable implements Interfaces\Controller
+class Router extends Abstracts\Mountable implements Interfaces\Controller
 {
 	/**
 	 * Get definitions that should be added to the service container

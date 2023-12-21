@@ -188,8 +188,7 @@ class Main extends Abstracts\Mountable implements Interfaces\Main, Interfaces\Co
 	{
 		return [
 			Controllers\Handlers::class => ContainerBuilder::autowire(),
-			Controllers\Routes::class   => ContainerBuilder::autowire(),
-			Controllers\Services::class => ContainerBuilder::autowire(),
+			Controllers\Router::class   => ContainerBuilder::autowire()
 		];
 	}
 	/**

@@ -30,18 +30,6 @@ class Router extends Abstracts\Mountable implements Interfaces\Services\Router
 	 * @var array<int, string>
 	 */
 	protected array $routes = [];
-	// /**
-	//  * Fire Mounted action on mount
-	//  *
-	//  * @return void
-	//  */
-	// #[OnMount]
-	// public function mount(): void
-	// {
-	// 	if ( ! $this->hasMounted() ) {
-	// 		do_action( "{$this->slug()}_mounted" );
-	// 	}
-	// }
 	/**
 	 * Define current route(s)
 	 *

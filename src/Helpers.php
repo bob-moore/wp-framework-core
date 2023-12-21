@@ -150,7 +150,7 @@ class Helpers
 	 *
 	 * @return mixed
 	 */
-	public function doFunction( ...$args )
+	public function executeFunction( ...$args )
 	{
 		$function = array_shift( $args );
 		ob_start();

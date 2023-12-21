@@ -13,8 +13,6 @@
 
 namespace Devkit\WPCore\Interfaces\Services;
 
-use Twig\Environment;
-
 /**
  * Service class for router actions
  *
@@ -23,8 +21,7 @@ use Twig\Environment;
 interface Compiler
 {
 	/**
-	 * Filters the default locations array for twig to search for templates. We never use some paths, so there's
-	 * no reason to waste overhead looking for templates there.
+	 * Add custom locations for twig to search in.
 	 *
 	 * @param array<string,mixed> $locations : Array of absolute paths to
 	 *                                        available templates.
@@ -33,45 +30,39 @@ interface Compiler
 	 */
 	public function templateLocations( array $locations ): array;
 	/**
-	 * Register custom function with TWIG
+	 * Compile a twig/html template file using Timber
 	 *
-	 * @param Environment $twig : instance of twig environment.
+	 * @param string|array<int, string> $template_file : relative path to template file.
+	 * @param array<string, mixed>      $context : additional context to pass to twig.
 	 *
-	 * @return Environment
+	 * @return string
 	 */
-	public function loadFunctions( Environment $twig ): Environment;
+	public function compile( $template_file, array $context = [] ): string;
 	/**
-	 * Register custom filters with TWIG
+	 * Compile a string with timber/twig
 	 *
-	 * @param Environment $twig : instance of twig environment.
+	 * @param string               $content : string content to compile.
+	 * @param array<string, mixed> $context : additional context to pass to twig.
 	 *
-	 * @return Environment
+	 * @return string
 	 */
-	public function loadFilters( Environment $twig ): Environment;
+	public function compileString( string $content, array $context = [] ): string;
 	/**
-	 * Add a function to collection of twig functions
+	 * Render a frontend twig template with timber/twig
 	 *
-	 * @param string                   $name : name of function to bind.
-	 * @param string|array<int, mixed> $callback : callback function.
-	 * @param array<string, mixed>     $args : args to add to twig function.
-	 *
-	 * @see https://twig.symfony.com/doc/3.x/advanced.html
-	 * @see https://timber.github.io/docs/guides/extending-timber/
+	 * @param string|array<int, string> $template_file : file to render.
+	 * @param array<string, mixed>      $context : additional context to pass to twig.
 	 *
 	 * @return void
 	 */
-	public function addFunction( string $name, string|array $callback, array $args = [] ): void;
+	public function render( $template_file, array $context = [] ): void;
 	/**
-	 * Add a filter to collection of twig functions
+	 * Render a string with timber/twig
 	 *
-	 * @param string                   $name : name of filter to bind.
-	 * @param string|array<int, mixed> $callback : callback function.
-	 * @param array<string, mixed>     $args : args to add to twig filter.
-	 *
-	 * @see https://twig.symfony.com/doc/3.x/advanced.html
-	 * @see https://timber.github.io/docs/guides/extending-timber/
+	 * @param string               $content : string content to compile.
+	 * @param array<string, mixed> $context : additional context to pass to twig.
 	 *
 	 * @return void
 	 */
-	public function addFilter( string $name, string|array $callback, array $args = [] ): void;
+	public function renderString( string $content, array $context = [] ): void;
 }
