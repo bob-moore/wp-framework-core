@@ -77,37 +77,43 @@ class Main extends Abstracts\Mountable implements Interfaces\Main, Interfaces\Co
 				$config['type'] 
 				?? Helpers::packageType()
 			);
+
 		$package = $config['package'] 
 				?? static::PACKAGE 
 				?? Helpers::slugify( basename( Helpers::getDefaultDir( $type ) )
 			);
+
 		$app_dir = untrailingslashit(
 				$config['dir'] 
 				?? Helpers::getDefaultDir( $type )
 			);
+
 		$app_url = untrailingslashit( 
 				$config['url'] 
 				?? Helpers::getDefaultUrl( $app_dir )
 			);
-		$assets  = [
+
+		$assets = [
 			'dir' => untrailingslashit( 
-					ltrim( 
-						$config['assets']['dir'] 
-						?? is_string( $config['assets'] ?? false ) ? $config['assets'] : 'dist',
+					ltrim(
+						( is_string( $config['assets']['dir'] ?? false ) ? $config['assets']['dir'] : null )
+						?? ( is_string( $config['assets'] ?? false ) ? trim( $config['assets'] ) : 'dist' ),
 						'/' 
 					)
 				),
 			'url' => ContainerBuilder::string( '{config.url}/{config.assets.dir}' ),
 		];
-		$views  = [
+
+		$views = [
 			'dir' => untrailingslashit( 
-				ltrim( 
-					$config['views']['dir']
-					?? is_string( $config['views'] ?? false ) ? $config['assets'] : 'views',
-					'/' 
+				ltrim(
+					( is_string( $config['views']['dir'] ?? false ) ? trim( $config['assets']['dir'] ) : null )
+					?? ( is_string( $config['views'] ?? false ) ? $config['assets'] : 'views' ),
+					'/'
 				)
 			),
 		];
+
 		$this->config = array_merge(
 			$config,
 			[
@@ -161,6 +167,7 @@ class Main extends Abstracts\Mountable implements Interfaces\Main, Interfaces\Co
 
 		$container_builder->addDefinitions( 
 			[ 'config' => ContainerBuilder::array( $this->config ) ],
+			[ Controllers\Handlers::class => ContainerBuilder::autowire() ],
 			static::getServiceDefinitions()
 		);		
 
@@ -186,10 +193,7 @@ class Main extends Abstracts\Mountable implements Interfaces\Main, Interfaces\Co
 	 */
 	public static function getServiceDefinitions(): array
 	{
-		return [
-			Controllers\Handlers::class => ContainerBuilder::autowire(),
-			Controllers\Router::class   => ContainerBuilder::autowire()
-		];
+		return [];
 	}
 	/**
 	 * Helper function to mount new instance of class
