@@ -302,4 +302,30 @@ class Helpers
 	{
 		do_action( 'qm/debug', $item );
 	}
+	/**
+     * Pretty print an item
+     *
+     * @param mixed $item : item to print.
+     *
+     * @return void
+     */
+    public static function print( mixed $item ): void
+    {
+        echo '<pre>';
+        print_r($item);
+        echo '</pre>';
+    }
+    /**
+     * Var dump an item using symfony's dump function.
+     *
+     * @param mixed $item : item to dump.
+     *
+     * @return void
+     */
+    public static function dump( mixed $item ): void
+    {
+        if ( function_exists('dump') ) {
+            \dump( $item );
+        }
+    }
 }

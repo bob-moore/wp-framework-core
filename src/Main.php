@@ -107,8 +107,8 @@ class Main extends Abstracts\Mountable implements Interfaces\Main, Interfaces\Co
 		$views = [
 			'dir' => untrailingslashit( 
 				ltrim(
-					( is_string( $config['views']['dir'] ?? false ) ? trim( $config['assets']['dir'] ) : null )
-					?? ( is_string( $config['views'] ?? false ) ? $config['assets'] : 'views' ),
+					( is_string( $config['views']['dir'] ?? false ) ? trim( $config['views']['dir'] ) : null )
+					?? ( is_string( $config['views'] ?? false ) ? $config['views'] : 'views' ),
 					'/'
 				)
 			),
