@@ -164,7 +164,7 @@ class Scripts extends Abstracts\Mountable implements
 
 			$version = ! empty( $assets['version'] ) ? $assets['version'] : filemtime( $file );
 
-			$handle = str_replace( [ '/', '\\', ' ' ], '-', $this->package ) . '-' . $handle;
+			$package_handle = str_replace( [ '/', '\\', ' ' ], '-', $this->package ) . '-' . $handle;
 
 			$path = $this->url( $path );
 		}
@@ -179,7 +179,7 @@ class Scripts extends Abstracts\Mountable implements
 		 * Enqueue script
 		 */
 		wp_register_script(
-			$handle,
+			$package_handle ?? $handle,
 			$path,
 			apply_filters( "{$this->package}_{$handle}_script_dependencies", $dependencies ),
 			$version,
