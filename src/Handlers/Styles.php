@@ -125,7 +125,7 @@ class Styles extends Abstracts\Mountable implements
 		if ( is_file( $file ) ) {
 			$version = $version ?? filemtime( $file );
 
-			$handle = str_replace( [ '/', '\\', ' ' ], '-', $this->package ) . '-' . $handle;
+			$package_handle = str_replace( [ '/', '\\', ' ' ], '-', $this->package ) . '-' . $handle;
 
 			$path = $this->url( $path );
 		}
@@ -138,7 +138,7 @@ class Styles extends Abstracts\Mountable implements
 		}
 
 		wp_register_style(
-			$handle,
+			$package_handle ?? $handle,
 			$path,
 			apply_filters( "{$this->package}_{$handle}_style_dependencies", $dependencies ),
 			$version,
