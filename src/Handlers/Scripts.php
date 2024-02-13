@@ -186,6 +186,6 @@ class Scripts extends Abstracts\Mountable implements
 			$in_footer
 		);
 
-		return $handle;
+		return $package_handle ?? $handle;
 	}
 }
