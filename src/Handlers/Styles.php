@@ -145,6 +145,6 @@ class Styles extends Abstracts\Mountable implements
 			$screens
 		);
 
-		return $handle;
+		return $package_handle ?? $handle;
 	}
 }
