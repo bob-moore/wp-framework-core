@@ -40,7 +40,7 @@ class Main extends Abstracts\Mountable implements Interfaces\Main, Interfaces\Co
 	 *
 	 * @var string
 	 */
-	protected const PACKAGE = null;
+	protected const PACKAGE = '';
 	/**
 	 * Configuration array
 	 *
