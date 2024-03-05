@@ -39,13 +39,13 @@ abstract class Mountable extends Member implements Interfaces\Mountable
 	 */
 	protected function slug(): string
 	{
-		if ( ! isset( $this->slug ) ) {
+		if ( empty( $this->slug ) ) {
 			$this->slug = Helpers::slugify( static::class );
 		}
 		return $this->slug;
 	}
 	/**
-	 * Check if loading action has already fired
+	 * Check if the loading action has already been fired
 	 *
 	 * @return int
 	 */
