@@ -32,7 +32,7 @@
 	},
 	"require": {
 		"php-di/php-di": "^7.0",
-		"symfony/var-dumper": "^6.0",
+		"symfony/var-dumper": "^6.0"
 	},
 	"require-dev": {
 		"squizlabs/php_codesniffer": "^3.7",
