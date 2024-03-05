@@ -31,12 +31,12 @@
 		}
 	},
 	"require": {
-		"php-di/php-di": "^7.0"
+		"php-di/php-di": "^7.0",
+		"symfony/var-dumper": "^6.0",
 	},
 	"require-dev": {
 		"squizlabs/php_codesniffer": "^3.7",
 		"phpunit/phpunit": "^9.6",
-		"symfony/var-dumper": "^6.0",
 		"wp-coding-standards/wpcs": "^3.0",
 		"phpstan/phpstan": "^1.10",
 		"szepeviktor/phpstan-wordpress": "^1.3",
